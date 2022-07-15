@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from docx2python import docx2python
 
-# Change these with a fitting path
+# Change this with a fitting path
 DOCX_FILES_DIRECTORY = "./path/"
 
 # Lists all the files in for the given path
@@ -27,7 +27,7 @@ def get_base_footnotes_as_list():
         List of footnotes, each footnote being on a single row.
     """
     base_footnotes_array = []
-    base_document = docx2python("./path/to/BaseDocument.docx")
+    base_document = docx2python("./path/to/BaseDocument.docx") # Change this with a fitting path
     for x in np.array(base_document.footnotes, dtype=object):
         for y in x:
             for z in y:
@@ -93,6 +93,7 @@ def create_csv_for_missing_footnotes():
             variant_footnotes_list, original_footnotes_list)
 
         missing_footnotes_df = pd.DataFrame(missing_footnotes)
+        # You might need to create those folders
         missing_footnotes_df.to_csv("./CSV/MissingFootnotes/Missing_Footnotes_" +
                                     docx_file + ".csv", sep=",")
     return print("CSVs finished")
@@ -112,9 +113,10 @@ def create_csv_for_additional_footnotes():
             original_footnotes_list, variant_footnotes_list)
 
         additional_footnotes_df = pd.DataFrame(additional_footnotes)
+        # You might need to create those folders
         additional_footnotes_df.to_csv(
             "./CSV/AdditionalFootnotes/Additional_Footnotes_" + docx_file + ".csv",
-            sep=",")  # You might need to create those folders
+            sep=",")
     return print("CSVs finished")
 
 
