@@ -1,0 +1,5 @@
+numpy
+pandas
+docx2python
+PyQt6
+python-docx

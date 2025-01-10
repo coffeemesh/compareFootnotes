@@ -1,76 +1,70 @@
-#! /usr/bin/env python
-"""
-A python script to extract footers from .docx documents and compare them in a .csv.
-Uses the docx2python library. You must define your own paths.
-"""
-from __future__ import print_function
+def extract_footnotes(docx_file):
+    """Extracts all footnotes from a given .docx file.
 
-import os
+    Args:
+        docx_file (str): Path to the .docx file.
 
-import numpy as np
-import pandas as pd
-from docx2python import docx2python
+    Returns:
+        List of footnotes, each footnote being on a single row.
+    """
+    footnotes_array = []
+    document = docx2python(docx_file)
+    for x in np.array(document.footnotes, dtype=object):
+        for y in x:
+            for z in y:
+                footnotes_array.append(z)
+    return footnotes_array
 
-# Change this with a fitting path
-DOCX_FILES_DIRECTORY = "./path/"
 
-# Lists all the files in for the given path
-files = os.listdir(DOCX_FILES_DIRECTORY)
-# Filters the previous result by keeping only .docx files
-docx_files = [docxFile for docxFile in files if docxFile.endswith(".docx")]
+def get_footnotes_as_list(docx_file):
+    """Returns all the footnotes of a specific .docx document as a sorted list.
+
+    Args:
+        docx_file (str): Path to the .docx file.
+
+    Returns:
+        List of footnotes, each footnote being on a single row.
+    """
+    footnotes_array = extract_footnotes(docx_file)
+    footnotes_df = pd.DataFrame(footnotes_array, columns=['Footnote'])
+    footnotes_list = footnotes_df['Footnote'].tolist()
+    footnotes_list.sort()
+    return footnotes_list
 
 
 def get_base_footnotes_as_list():
-    """ Returns all the footnotes of a specific .docx document.
+    """Returns all the footnotes of the base .docx document as a sorted list.
 
     Returns:
         List of footnotes, each footnote being on a single row.
     """
-    base_footnotes_array = []
-    base_document = docx2python("./path/to/BaseDocument.docx") # Change this with a fitting path
-    for x in np.array(base_document.footnotes, dtype=object):
-        for y in x:
-            for z in y:
-                base_footnotes_array.append(z)
-
-    base_df = pd.DataFrame(base_footnotes_array, columns=[
-        'Footnote1', 'Footnote2'])
-    base_df['Footnote'] = base_df['Footnote1'].map(
-        str) + base_df['Footnote2'].map(str)
-    base_footnotes_list = base_df['Footnote'].tolist()
-    base_footnotes_list.sort()
-    return base_footnotes_list
+    return get_footnotes_as_list(BASE_DOCUMENT)
 
 
 def get_variant_footnotes_as_list(docx_file):
-    """ Returns all the Footnotes for the given Document
+    """Returns all the footnotes of a variant .docx document as a sorted list.
 
     Args:
-        docx_file (File): A Word Document ending with .docx
+        docx_file (str): Name of the .docx file.
 
     Returns:
         List of footnotes, each footnote being on a single row.
     """
-    variant_footnotes_array = []
-    file_path = os.path.join(DOCX_FILES_DIRECTORY, docx_file)
-    variant_document = docx2python(file_path)
-    for x in np.array(variant_document.footnotes, dtype=object):
-        for y in x:
-            for z in y:
-                variant_footnotes_array.append(z)
-        variant_df = pd.DataFrame(variant_footnotes_array, columns=[
-            'Footnote1', 'Footnote2'])
-        variant_df['Footnote'] = variant_df['Footnote1'].map(
-            str) + variant_df['Footnote2'].map(str)
-        variant_footnotes_list = variant_df['Footnote'].tolist()
-        variant_footnotes_list.sort()
-        return variant_footnotes_list
+    variant_docx_file = os.path.join(DOCX_FILES_DIRECTORY, docx_file)
+    return get_footnotes_as_list(variant_docx_file)
 
 
 def find_missing_footnotes(variant_footnotes_list, original_footnotes_list):
-    missing_footnotes = set(variant_footnotes_list).difference(
-        original_footnotes_list)
-    return missing_footnotes
+    """Finds footnotes that are in the variant list but not in the original list.
+
+    Args:
+        variant_footnotes_list (list): List of footnotes from the variant document.
+        original_footnotes_list (list): List of footnotes from the original document.
+
+    Returns:
+        Set of missing footnotes.
+    """
+    return set(variant_footnotes_list).difference(original_footnotes_list)
 
 
 def find_additional_footnotes(original_footnotes_list, variant_footnotes_list):
@@ -150,3 +144,4 @@ def compare_base_document_with_variant():
     for docx_file in docx_files:
         create_footnotes_comparison_csv(docx_file)
     return print("CSVs finished")
+
